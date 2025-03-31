@@ -34,13 +34,17 @@ struct CityCellView: View {
     .padding()
     .background(Color(.systemBackground))
     .shadow(radius: 1)
-    .onTapGesture {
-      selectedCity = city
-    }
+//    .onTapGesture {
+//      selectedCity = city
+//    }
   }
 }
 
 #Preview {
-  CityCellView(city: .init(id: 123, title: "Strathmore, CA", subtitle: "Lat: 51.05011, Lon: -113.385231", isFavorite: false),
+  CityCellView(city: .init(title: "Strathmore, CA",
+                           subtitle: "Lat: 51.05011, Lon: -113.385231",
+                           isFavorite: false,
+                           lat: 44.54,
+                           lon: 24.28),
                selectedCity: .constant(nil))
 }

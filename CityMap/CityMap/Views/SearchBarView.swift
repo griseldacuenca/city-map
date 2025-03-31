@@ -11,7 +11,6 @@ struct SearchBarView: View {
   
   @Binding var searchTerm: String
   let placeholder: String
-  let results: [CityCellItem]
   @Binding var noMatchesFound: Bool
   let isLoading: Bool
   let onSearch: () -> Void
@@ -57,22 +56,6 @@ struct SearchBarView: View {
             }
           }
         )
-      
-      LazyVStack(spacing: 8)  {
-        if noMatchesFound {
-          Text("No results found. Please refine your search.")
-            .frame(maxWidth: .infinity, alignment: .leading)
-        } else {
-          ForEach(results) { result in
-            Text(result.title)
-              .frame(maxWidth: .infinity, alignment: .leading)
-              .onTapGesture {
-                searchTerm = result.title
-                onSelectedItem(result)
-              }
-          }
-        }
-      }
     }
     .padding(.horizontal, 10)
   }
@@ -81,11 +64,6 @@ struct SearchBarView: View {
 #Preview {
   SearchBarView(searchTerm: .constant(""),
                 placeholder: "Search...",
-                results: [.init(id: 1, title: "Denver, US", subtitle: "Long: 24.28. Lat: 44.54", isFavorite: false),
-                          .init(id: 2, title: "Denver, US", subtitle: "Long: 24.28. Lat: 44.54", isFavorite: false),
-                          .init(id: 3, title: "Denver, US", subtitle: "Long: 24.28. Lat: 44.54", isFavorite: false),
-                          .init(id: 4, title: "Denver, US", subtitle: "Long: 24.28. Lat: 44.54", isFavorite: false),
-                          .init(id: 5, title: "Denver, US", subtitle: "Long: 24.28. Lat: 44.54", isFavorite: false)],
                 noMatchesFound: .constant(false),
                 isLoading: false,
                 onSearch: {},

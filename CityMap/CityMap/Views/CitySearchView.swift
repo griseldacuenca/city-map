@@ -12,17 +12,24 @@ struct CitySearchBarView: View {
   let isLoading: Bool
   @Binding var searchTerm: String
   let previousSelection: String?
-  @Binding var noMatchesFound: Bool
   let onSearch: () async -> ()
   let onSelectedItem: (CityCellItem?) -> Void
   
+  @State private var debounceTask: DispatchWorkItem? = nil
+
   var body: some View {
     TextField("Filter", text: $searchTerm)
       .onChange(of: searchTerm) {
         if searchTerm != previousSelection {
-          Task {
-            noMatchesFound = false
-            await onSearch()
+          debounceTask?.cancel()
+          
+          let task = DispatchWorkItem {
+            Task { await onSearch() }
+          }
+          
+          debounceTask = task
+          DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            task.perform()
           }
         }
       }
@@ -60,9 +67,8 @@ struct CitySearchBarView: View {
 
 #Preview {
   CitySearchBarView(isLoading: false,
-                    searchTerm: .constant("ABC"),
+                    searchTerm: .constant("Hawai"),
                     previousSelection: nil,
-                    noMatchesFound: .constant(false),
                     onSearch: {},
                     onSelectedItem: {_ in })
 }
