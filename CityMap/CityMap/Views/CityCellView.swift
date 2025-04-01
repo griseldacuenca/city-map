@@ -9,8 +9,8 @@ import SwiftUI
 
 struct CityCellView: View {
   
-  @State var city: CityCellItem
-  @Binding var selectedCity: CityCellItem?
+  let city: CityCellItem
+  let onToggleFavorite: () -> Void
   
   var body: some View {
     HStack {
@@ -25,7 +25,7 @@ struct CityCellView: View {
       Spacer()
       
       Button(action: {
-        city.isFavorite.toggle()
+        onToggleFavorite()
       }) {
         Image(systemName: city.isFavorite ? "star.fill" : "star")
           .foregroundColor(city.isFavorite ? .blue : .gray)
@@ -34,17 +34,15 @@ struct CityCellView: View {
     .padding()
     .background(Color(.systemBackground))
     .shadow(radius: 1)
-//    .onTapGesture {
-//      selectedCity = city
-//    }
   }
 }
 
 #Preview {
-  CityCellView(city: .init(title: "Strathmore, CA",
+  CityCellView(city: .init(id: 123,
+                           title: "Strathmore, CA",
                            subtitle: "Lat: 51.05011, Lon: -113.385231",
                            isFavorite: false,
                            lat: 44.54,
                            lon: 24.28),
-               selectedCity: .constant(nil))
+               onToggleFavorite: {})
 }

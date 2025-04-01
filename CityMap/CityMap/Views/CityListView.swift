@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CityListView: View {
+  
   @StateObject var vm = CityListViewModel(dependencies: .init(getCitiesUseCase: GetCitiesUseCase()))
   
   var body: some View {
@@ -31,15 +32,22 @@ struct CityListView: View {
             onSelectedItem: vm.onSelectedCity
           )
           
+          Toggle("Search Favorites Only", isOn: $vm.searchFavoritesOnly)
+            .padding(.horizontal)
+          
           ScrollView {
             LazyVStack(spacing: 8) {
               if vm.noMatchesFound {
                 ContentUnavailableView.search
               } else {
-                ForEach(vm.viewContent) { result in
-                  NavigationLink(destination: CityMapView(city: result)) {
-                    CityCellView(city: result,
-                                 selectedCity: $vm.onSelectedItem)
+                ForEach(vm.viewContent.indices, id: \.self) { index in
+                  NavigationLink(destination: CityMapView(city: vm.viewContent[index])) {
+                    CityCellView(
+                      city: vm.viewContent[index],
+                      onToggleFavorite: {
+                        vm.handleOnToggleFavorite(with: index)
+                      }
+                    )
                   }
                 }
               }
@@ -59,7 +67,8 @@ struct CityListView: View {
 
 #Preview("WithData") {
   CityListView(vm: CityListViewModel(dependencies: .init(getCitiesUseCase: MockGetCitiesUseCase()),
-                                     viewContent: [.init(title: "Buenos Aires, AR",
+                                     viewContent: [.init(id: 123,
+                                                         title: "Buenos Aires, AR",
                                                          subtitle: "Long: -78.497498, Lat: -9.12417",
                                                          isFavorite: false,
                                                          lat: -9.12417,

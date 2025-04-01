@@ -18,16 +18,16 @@ final class CityListViewModel: ObservableObject {
 
   @Published var cities: [City] = []
   @Published var filteredCities: [City] = []
-  @Published var showFavoritesOnly = false
+  @Published var searchFavoritesOnly = false
   
   // In-memory cache for favorite cities
-  @AppStorage("favoriteCities") private var favoriteCityIDs = ""
+  @AppStorage("favoriteCities") private var favoriteCityIDs = "" // Stored as a comma-separated string
   @Published var favoriteCities: Set<Int> = []
   
-  @Published var onSelectedItem: CityCellItem?
   @Published var previousSelection: String?
   
   private let dependencies: Dependencies
+  private var allCities: [CityCellItem] = []
   private var prefixTrie = PrefixTrie()
   private var task: Task<Void, Never>?
   
@@ -38,6 +38,10 @@ final class CityListViewModel: ObservableObject {
   init(dependencies: Dependencies, viewContent: [CityCellItem] = []) {
     self.dependencies = dependencies
     self.viewContent = viewContent
+    
+    // Load saved favorite city IDs from @AppStorage
+    let intIDs = favoriteCityIDs.split(separator: ",").compactMap { Int($0) }
+    self.favoriteCities = Set(intIDs)
   }
   
   func handleOnAppear() async {
@@ -46,15 +50,30 @@ final class CityListViewModel: ObservableObject {
     }
   }
   
+  func handleOnToggleFavorite(with index: Int) {
+    viewContent[index].isFavorite.toggle()
+    
+    let cityID = viewContent[index].id
+    
+    if viewContent[index].isFavorite {
+      favoriteCities.insert(cityID)
+    } else {
+      favoriteCities.remove(cityID)
+    }
+    
+    // Save back to @AppStorage as comma-separated Ints
+    favoriteCityIDs = favoriteCities.map { String($0) }.joined(separator: ",")
+  }
+
+  
   @MainActor
-  func onSearch() async {
+  func onSearch(favoritesOnly: Bool = false) async {
+    isLoading = true
     guard !searchTerm.isEmpty else {
-//      viewContent = []
       return
     }
     print("searchTerm: \(searchTerm)")
-//     await fetchCities()
-    self.filterCitiesData(with: self.searchTerm, favoritesOnly: self.showFavoritesOnly)
+    self.filterCitiesData(with: self.searchTerm, favoritesOnly: self.searchFavoritesOnly)
   }
   
   @MainActor
@@ -93,7 +112,6 @@ final class CityListViewModel: ObservableObject {
     await MainActor.run {
       self.cities = sortedCities
       self.prefixTrie = trie
-//      self.filterCitiesData(with: self.searchTerm, favoritesOnly: self.showFavoritesOnly)
       self.isLoading = false
     }
   }
@@ -124,7 +142,6 @@ final class CityListViewModel: ObservableObject {
     // Update on the main thread
     await MainActor.run {
       self.filteredCities = matchingCities
-      // Transform to cityView:
       viewContent = transformCitiesToCellItems(self.filteredCities)
       if viewContent.isEmpty {
         noMatchesFound = true
@@ -151,14 +168,16 @@ final class CityListViewModel: ObservableObject {
   private func transformCitiesToCellItems(_ cities: [City]) -> [CityCellItem] {
     return cities.map { city in
       CityCellItem(
+        id: city.id,
         title: "\(city.name), \(city.country)",
         subtitle: "Lat: \(city.coord.lat), Lon: \(city.coord.lon)",
-        isFavorite: false,
+        isFavorite: favoriteCities.contains(city.id),
         lat: city.coord.lat,
         lon: city.coord.lon
       )
     }
   }
+
 
   func filterCities(with prefix: String, content: [City]) -> [City] {
     return content.filter { $0.name.lowercased().hasPrefix(prefix.lowercased()) }

@@ -37,7 +37,8 @@ struct CityMapView: View {
 }
 
 #Preview {
-  CityMapView(city: .init(title: "Denver, US",
+  CityMapView(city: .init(id: 123,
+                          title: "Denver, US",
                           subtitle: "Long: 24.28. Lat: 44.54",
                           isFavorite: false,
                           lat: 44.54,

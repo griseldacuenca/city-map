@@ -8,9 +8,9 @@
 import Foundation
 
 struct City: Codable, Identifiable {
-  let country: String
-  let name: String
   let id: Int
+  let name: String
+  let country: String
   let coord: Coordinates
   
   enum CodingKeys: String, CodingKey {
@@ -20,9 +20,9 @@ struct City: Codable, Identifiable {
     case coord
   }
   
-  static let mock = City(country: "IT",
+  static let mock = City(id: 6541492,
                          name: "Arese",
-                         id: 6541492,
+                         country: "IT",
                          coord: .init(lon: 9.07654,
                                       lat: 45.552269))
 }

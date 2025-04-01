@@ -8,7 +8,7 @@
 import Foundation
 
 struct CityCellItem: Identifiable, Hashable {
-  let id: UUID = UUID()
+  let id: Int
   let title: String
   let subtitle: String
   var isFavorite: Bool
