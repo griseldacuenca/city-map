@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct CitySearchBarView: View {
-
-  let isLoading: Bool
+  
   @Binding var searchTerm: String
   @Binding var noMatchesFound: Bool
   let onSearch: () async -> ()
@@ -33,12 +32,7 @@ struct CitySearchBarView: View {
             .foregroundColor(.gray)
             .padding(.leading, 8)
           Spacer()
-          if isLoading {
-            ProgressView()
-              .progressViewStyle(CircularProgressViewStyle(tint: Color(.systemBlue)))
-              .frame(width: 20, height: 20)
-              .padding(.trailing, 16)
-          } else if !searchTerm.isEmpty {
+          if !searchTerm.isEmpty {
             Button {
               searchTerm = ""
               onSelectedItem(nil)
@@ -56,8 +50,7 @@ struct CitySearchBarView: View {
 
 
 #Preview {
-  CitySearchBarView(isLoading: false,
-                    searchTerm: .constant("Hawai"),
+  CitySearchBarView(searchTerm: .constant("Hawai"),
                     noMatchesFound: .constant(false),
                     onSearch: {},
                     onSelectedItem: {_ in })

@@ -17,6 +17,7 @@ struct CityListView: View {
         VStack {
           Spacer()
           ProgressView("Initializing the app...")
+            .progressViewStyle(CircularProgressViewStyle(tint: Color(.systemBlue)))
           Spacer()
         }
         .onAppear {
@@ -25,7 +26,6 @@ struct CityListView: View {
       } else {
         VStack {
           CitySearchBarView(
-            isLoading: vm.isLoading,
             searchTerm: $vm.searchTerm,
             noMatchesFound: $vm.noMatchesFound,
             onSearch: { Task { await vm.onSearch() }},
