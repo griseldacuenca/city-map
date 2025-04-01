@@ -12,46 +12,61 @@ struct CityListView: View {
   
   var body: some View {
     NavigationStack {
-      VStack {
-        CitySearchBarView(
-          isLoading: vm.isLoading,
-          searchTerm: $vm.searchTerm,
-          previousSelection: vm.previousSelection,
-          onSearch: { Task { await vm.onSearch() }},
-          onSelectedItem: vm.onSelectedCity
-        )
-        
-        ScrollView {
-          LazyVStack(spacing: 8) {
-            if vm.noMatchesFound{
-              Text("No results found. Please refine your search.")
-                .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-              ForEach(vm.viewContent) { result in
-                NavigationLink(destination: CityMapView(city: result)) {
-                  CityCellView(city: result,
-                               selectedCity: $vm.onSelectedItem)
+      if vm.isInitialLoading {
+        VStack {
+          Spacer()
+          ProgressView("Initializing the app...")
+          Spacer()
+        }
+        .onAppear {
+          Task { await vm.handleOnAppear() }
+        }
+      } else {
+        VStack {
+          CitySearchBarView(
+            isLoading: vm.isLoading,
+            searchTerm: $vm.searchTerm,
+            noMatchesFound: $vm.noMatchesFound,
+            onSearch: { Task { await vm.onSearch() }},
+            onSelectedItem: vm.onSelectedCity
+          )
+          
+          ScrollView {
+            LazyVStack(spacing: 8) {
+              if vm.noMatchesFound {
+                ContentUnavailableView.search
+              } else {
+                ForEach(vm.viewContent) { result in
+                  NavigationLink(destination: CityMapView(city: result)) {
+                    CityCellView(city: result,
+                                 selectedCity: $vm.onSelectedItem)
+                  }
                 }
               }
             }
           }
+          
+          Spacer()
         }
-        
-        Spacer()
-      }
-      .padding(.horizontal, 10)
-      .navigationDestination(for: CityCellItem.self) { result in
-        CityMapView(city: result)
+        .padding(.horizontal, 10)
+        .navigationDestination(for: CityCellItem.self) { result in
+          CityMapView(city: result)
+        }
       }
     }
   }
 }
 
-#Preview {
+#Preview("WithData") {
   CityListView(vm: CityListViewModel(dependencies: .init(getCitiesUseCase: MockGetCitiesUseCase()),
                                      viewContent: [.init(title: "Buenos Aires, AR",
                                                          subtitle: "Long: -78.497498, Lat: -9.12417",
                                                          isFavorite: false,
                                                          lat: -9.12417,
                                                          lon: -78.497498)]))
+}
+
+#Preview("EmptyState") {
+  CityListView(vm: CityListViewModel(dependencies: .init(getCitiesUseCase: MockGetCitiesUseCase()),
+                                     viewContent: []))
 }

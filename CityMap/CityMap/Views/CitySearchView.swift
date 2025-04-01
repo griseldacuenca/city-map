@@ -11,7 +11,7 @@ struct CitySearchBarView: View {
 
   let isLoading: Bool
   @Binding var searchTerm: String
-  let previousSelection: String?
+  @Binding var noMatchesFound: Bool
   let onSearch: () async -> ()
   let onSelectedItem: (CityCellItem?) -> Void
   
@@ -20,18 +20,7 @@ struct CitySearchBarView: View {
   var body: some View {
     TextField("Filter", text: $searchTerm)
       .onChange(of: searchTerm) {
-        if searchTerm != previousSelection {
-          debounceTask?.cancel()
-          
-          let task = DispatchWorkItem {
-            Task { await onSearch() }
-          }
-          
-          debounceTask = task
-          DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            task.perform()
-          }
-        }
+        Task { await onSearch() }
       }
       .autocorrectionDisabled(true)
       .padding(10)
@@ -53,6 +42,7 @@ struct CitySearchBarView: View {
             Button {
               searchTerm = ""
               onSelectedItem(nil)
+              noMatchesFound = false
             } label: {
               Image(systemName: "xmark.circle.fill")
                 .foregroundColor(.gray)
@@ -68,7 +58,7 @@ struct CitySearchBarView: View {
 #Preview {
   CitySearchBarView(isLoading: false,
                     searchTerm: .constant("Hawai"),
-                    previousSelection: nil,
+                    noMatchesFound: .constant(false),
                     onSearch: {},
                     onSelectedItem: {_ in })
 }
