@@ -32,7 +32,6 @@ struct CityCellView: View {
       }
     }
     .padding()
-    .background(Color(.systemBackground))
     .shadow(radius: 1)
   }
 }

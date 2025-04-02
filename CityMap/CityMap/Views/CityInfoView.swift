@@ -9,12 +9,25 @@ import SwiftUI
 
 struct CityInfoView: View {
   let city: CityCellItem
+  @Environment(\.dismiss) private var dismiss
   
   var body: some View {
     VStack(alignment: .leading, spacing: 16) {
-      Text(city.title)
-        .font(.largeTitle)
-        .bold()
+      HStack {
+        Text(city.title)
+          .font(.largeTitle)
+          .bold()
+        
+        Spacer()
+        
+        Button(action: {
+          dismiss()
+        }) {
+          Image(systemName: "xmark.circle.fill")
+            .font(.title2)
+            .foregroundColor(.gray)
+        }
+      }
       
       Divider()
       

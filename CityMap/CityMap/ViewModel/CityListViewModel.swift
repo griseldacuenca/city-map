@@ -40,9 +40,8 @@ final class CityListViewModel: ObservableObject {
     var getCitiesUseCase: GetCitiesUseCaseProtocol
   }
   
-  init(dependencies: Dependencies, viewContent: [CityCellItem] = []) {
+  init(dependencies: Dependencies) {
     self.dependencies = dependencies
-    self.viewContent = viewContent
     
     // Load saved favorite city IDs from @AppStorage
     let intIDs = favoriteCityIDs.split(separator: ",").compactMap { Int($0) }

@@ -9,9 +9,7 @@ import SwiftUI
 import MapKit
 
 struct CityMapView: View {
-  
   let city: CityCellItem
-  
   @State private var position: MapCameraPosition = .automatic
   @State private var showingCityInfo = false
   
@@ -24,7 +22,13 @@ struct CityMapView: View {
             .font(.title)
         }
       }
+      .onChange(of: city) { _, newCity in
+        // Update the position whenever the city changes
+        let cityCoordinates = CLLocationCoordinate2D(latitude: newCity.lat, longitude: newCity.lon)
+        position = .region(MKCoordinateRegion(center: cityCoordinates, span: MKCoordinateSpan(latitudeDelta: 5, longitudeDelta: 5)))
+      }
       .onAppear {
+        // Initial position setup
         let cityCoordinates = CLLocationCoordinate2D(latitude: city.lat, longitude: city.lon)
         position = .region(MKCoordinateRegion(center: cityCoordinates, span: MKCoordinateSpan(latitudeDelta: 5, longitudeDelta: 5)))
       }

@@ -22,19 +22,16 @@ struct GetCitiesUseCase: GetCitiesUseCaseProtocol {
       .first!.appendingPathComponent("cities.json.gz")
   }
   
-  /// Last updated timestamp stored in UserDefaults
-  private let lastUpdateKey = "lastCitiesUpdateTimestamp"
   
-  /// Expiration time before refetching (e.g., 7 days)
-  private let updateInterval: TimeInterval = 7 * 24 * 60 * 60 // 7 days
   
   func execute(url: String) async throws -> [City] {
-    let lastUpdate = UserDefaults.standard.double(forKey: lastUpdateKey)
+    let lastUpdate = UserDefaults.standard.double(forKey: FileManagerConstants.lastUpdateKey)
     let currentTime = Date().timeIntervalSince1970
     
     // Check if the cache is still fresh
+    // Compare the expiration time before refetching
     if FileManager.default.fileExists(atPath: compressedFilePath.path),
-       currentTime - lastUpdate < updateInterval {
+       currentTime - lastUpdate < FileManagerConstants.updateInterval {
       print("Using cached data (Updated: \(Date(timeIntervalSince1970: lastUpdate)))")
       return try await loadCompressedJSON()
     }
@@ -45,7 +42,7 @@ struct GetCitiesUseCase: GetCitiesUseCaseProtocol {
     
     // Save compressed JSON & update timestamp
     try saveCompressedJSON(cities)
-    UserDefaults.standard.set(currentTime, forKey: lastUpdateKey)
+    UserDefaults.standard.set(currentTime, forKey: FileManagerConstants.lastUpdateKey)
     
     return cities
   }
