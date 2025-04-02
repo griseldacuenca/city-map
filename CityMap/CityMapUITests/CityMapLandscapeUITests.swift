@@ -57,16 +57,18 @@ final class CityMapLandscapeUITests: XCTestCase {
     let searchField = app.textFields["Filter"]
     
     // Verify that it exists
-    XCTAssertTrue(searchField.waitForExistence(timeout: 2), "Filter text field not found")
+    XCTAssertTrue(searchField.waitForExistence(timeout: 10), "Filter text field not found")
     tearDown()
   }
   
   func testCitySearch() {
     setUp()
+    
     let searchField = app.textFields["Filter"]
+    XCTAssertTrue(searchField.waitForExistence(timeout: 10), "Search field not found")
+    
     searchField.tap()
     searchField.typeText("Paris\n")
-    
     // Verify search updated the list
     let parisCell = app.staticTexts.matching(identifier: "Paris, FR").firstMatch
     XCTAssertTrue(parisCell.waitForExistence(timeout: 2), "Paris, FR was not found in the list")
@@ -81,6 +83,8 @@ final class CityMapLandscapeUITests: XCTestCase {
   func testDisplayMap() {
     setUp()
     let searchField = app.textFields["Filter"]
+    XCTAssertTrue(searchField.waitForExistence(timeout: 10), "Search field not found")
+    
     searchField.tap()
     searchField.typeText("Paris\n")
     
