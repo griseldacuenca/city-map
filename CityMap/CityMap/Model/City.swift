@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct City: Codable, Identifiable {
+struct City: Codable, Identifiable, Equatable {
   let id: Int
   let name: String
   let country: String
@@ -27,7 +27,7 @@ struct City: Codable, Identifiable {
                                       lat: 45.552269))
 }
 
-struct Coordinates: Codable {
+struct Coordinates: Codable, Equatable {
   let lon: Double
   let lat: Double
 }

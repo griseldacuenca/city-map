@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CityMainView: View {
   
-  @StateObject var vm = CityListViewModel(dependencies: .init(getCitiesUseCase: GetCitiesUseCase()))
+  @StateObject var vm = CityListViewModel(dependencies: .init(getCitiesUseCase: GetCitiesUseCase(api: APIRequestBuilder())))
   @State private var selectedCity: CityCellItem?
   @State private var orientation = UIDevice.current.orientation
   

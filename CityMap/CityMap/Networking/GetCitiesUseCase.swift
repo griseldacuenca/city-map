@@ -12,17 +12,19 @@ protocol GetCitiesUseCaseProtocol {
   func execute(url: String) async throws -> [City]
 }
 
-struct GetCitiesUseCase: GetCitiesUseCaseProtocol {
+class GetCitiesUseCase: GetCitiesUseCaseProtocol {
   
-  let api = APIRequestBuilder()
+  let api: APIRequestProtocol
+  
+  init(api: APIRequestProtocol) {
+    self.api = api
+  }
   
   /// File path for compressed cities JSON
-  private var compressedFilePath: URL {
+  var compressedFilePath: URL {
     FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
       .first!.appendingPathComponent("cities.json.gz")
   }
-  
-  
   
   func execute(url: String) async throws -> [City] {
     let lastUpdate = UserDefaults.standard.double(forKey: FileManagerConstants.lastUpdateKey)
@@ -38,7 +40,15 @@ struct GetCitiesUseCase: GetCitiesUseCaseProtocol {
     
     // If outdated or it does not exist, fetch fresh data from API
     print("Fetching fresh data from API...")
-    let cities = try await api.performRequest(url: url, method: .get, decodingType: [City].self)
+    
+    let cities = try await api.performRequest(url: url,
+                                              method: .get,
+                                              queryItems: [],
+                                              body: nil,
+                                              headers: nil,
+                                              decodingType: [City].self,
+                                              keyDecodingStrategy: nil,
+                                              dateDecodingStrategy: nil)
     
     // Save compressed JSON & update timestamp
     try saveCompressedJSON(cities)
@@ -47,16 +57,16 @@ struct GetCitiesUseCase: GetCitiesUseCaseProtocol {
     return cities
   }
   
-  /// Compress and save the JSON data to disk
-  private func saveCompressedJSON(_ cities: [City]) throws {
+  // Compress and save the JSON data to disk
+  func saveCompressedJSON(_ cities: [City]) throws {
     let jsonData = try JSONEncoder().encode(cities)
     let compressedData = try (jsonData as NSData).compressed(using: .lzfse) // LZFSE is faster than Gzip
     try compressedData.write(to: compressedFilePath)
     print("Compressed JSON saved: \(compressedFilePath.path)")
   }
   
-  /// Load and decompress JSON from disk
-  private func loadCompressedJSON() async throws -> [City] {
+  // Load and decompress JSON from disk
+  func loadCompressedJSON() async throws -> [City] {
     let compressedData = try Data(contentsOf: compressedFilePath)
     let decompressedData = try (compressedData as NSData).decompressed(using: .lzfse)
     return try JSONDecoder().decode([City].self, from: decompressedData as Data)

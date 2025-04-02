@@ -21,7 +21,20 @@ enum HttpMethod: String {
   case delete = "DELETE"
 }
 
-struct APIRequestBuilder {
+protocol APIRequestProtocol {
+  func performRequest<T: Decodable>(
+    url: String,
+    method: HttpMethod,
+    queryItems: [URLQueryItem]?,
+    body: Data?,
+    headers: [String: String]?,
+    decodingType: T.Type,
+    keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?,
+    dateDecodingStrategy: JSONDecoder.DateDecodingStrategy?
+  ) async throws -> T
+}
+
+final class APIRequestBuilder: APIRequestProtocol {
   
   private func makeRequest(url: String,
                            method: String,
@@ -60,14 +73,12 @@ struct APIRequestBuilder {
   func performRequest<T: Decodable>(
     url: String,
     method: HttpMethod,
-    queryItems: [URLQueryItem]? = nil,
-    body: Data? = nil,
-    headers: [String: String]? = nil,
+    queryItems: [URLQueryItem]?,
+    body: Data?,
+    headers: [String: String]?,
     decodingType: T.Type,
-    keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy? = nil,
-    dateDecodingStrategy: JSONDecoder.DateDecodingStrategy? = nil,
-    searchPath: Bool = false,
-    useJSONHeader: Bool = false
+    keyDecodingStrategy: JSONDecoder.KeyDecodingStrategy?,
+    dateDecodingStrategy: JSONDecoder.DateDecodingStrategy?
   ) async throws -> T {
     let data = try await makeRequest(url: url, method: method.rawValue, queryItems: queryItems, body: body, headers: headers)
     

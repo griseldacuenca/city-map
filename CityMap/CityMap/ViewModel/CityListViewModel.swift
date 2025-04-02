@@ -27,7 +27,7 @@ final class CityListViewModel: ObservableObject {
   }
   
   // In-memory cache for favorite cities
-  @AppStorage("favoriteCities") private var favoriteCityIDs = "" // Stored as a comma-separated string
+  @AppStorage("favoriteCities") private var favoriteCityIDs = ""
   @Published var favoriteCities: Set<Int> = []
   
   @Published var previousSelection: String?
@@ -49,9 +49,7 @@ final class CityListViewModel: ObservableObject {
   }
   
   func handleOnAppear() async {
-    if viewContent.isEmpty {
       await fetchCities()
-    }
   }
   
   func handleOnToggleFavorite(with index: Int) {
@@ -89,6 +87,16 @@ final class CityListViewModel: ObservableObject {
     }
     print("searchTerm: \(searchTerm)")
     await filterCitiesData(with: searchTerm, favoritesOnly: searchFavoritesOnly)
+  }
+  
+  @MainActor
+  func filterCitiesData(with prefix: String, favoritesOnly: Bool) async {
+    // Cancel any previous task to ensure UI responsiveness
+    task?.cancel()
+    
+    task = Task {
+      await performFiltering(prefix: prefix, favoritesOnly: favoritesOnly)
+    }
   }
   
   @MainActor
@@ -155,19 +163,6 @@ final class CityListViewModel: ObservableObject {
       viewContent = transformCitiesToCellItems(self.filteredCities)
       noMatchesFound = viewContent.isEmpty
     }
-  }
-  
-  func filterCitiesData(with prefix: String, favoritesOnly: Bool) async {
-    // Cancel any previous task to ensure UI responsiveness
-    task?.cancel()
-    
-    task = Task {
-      await performFiltering(prefix: prefix, favoritesOnly: favoritesOnly)
-    }
-  }
-  
-  func onSelectedCity(_ city: CityCellItem?) {
-    // Implementation would go here
   }
   
   private func transformCitiesToCellItems(_ cities: [City]) -> [CityCellItem] {

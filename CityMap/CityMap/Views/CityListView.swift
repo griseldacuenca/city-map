@@ -31,7 +31,6 @@ struct CityListView: View {
             noMatchesFound: $vm.noMatchesFound,
             onSearch: { Task { await vm.onSearch() }},
             onSelectedItem: { city in
-              vm.onSelectedCity(city)
               selectedCity = city
             }
           )
@@ -47,28 +46,21 @@ struct CityListView: View {
               } else {
                 ForEach(vm.viewContent.indices, id: \.self) { index in
                   let city = vm.viewContent[index]
+                  let isSelected = selectedCity?.id == city.id
                   
                   // Determine if we're using NavigationLink or just a button based on orientation
                   Group {
                     if orientation.isPortrait || orientation == .unknown {
                       NavigationLink(destination: CityMapView(city: city)) {
                         cityCell(for: index)
-                          .background(index % 2 == 0 ? Color.white : Color(.systemGray6))
-                          .cornerRadius(8)
+                          .cellBackground(index: index)
                       }
                     } else {
                       cityCell(for: index)
                         .onTapGesture {
                           selectedCity = city
                         }
-                        .background(
-                          RoundedRectangle(cornerRadius: 8)
-                            .fill(
-                              selectedCity?.id == city.id ?
-                              Color.blue.opacity(0.1) :
-                                (index % 2 == 0 ? Color.white : Color(.systemGray6))
-                            )
-                        )
+                        .cellBackground(index: index, isSelected: isSelected)
                     }
                   }
                 }
